@@ -1,0 +1,234 @@
+//package Lecture_2.Activity2;
+
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+import javax.swing.JOptionPane;
+
+public class VotingApplication {
+
+	/**
+	 * @param args
+	 */
+   public static void main(String[] args) {
+   	// TODO Auto-generated method stub
+      String pathCandidates= "candidate.txt"; 
+      String pathVoters = "voters.txt";
+      Candidate[] candidates =null;
+      Voter[] voters =null;
+      try{
+         candidates = getCandidates(pathCandidates);
+         voters = getVoters(pathVoters);
+         Candidate winner = getWinner(candidates , voters);
+         JOptionPane.showMessageDialog(null, "The winner is: \n" + winner.toString());
+      }
+      catch(FileNotFoundException e){
+      	
+      }
+      catch(IOException e){
+      	
+      }
+   }
+	
+	
+   public static Candidate[] getCandidates(String path) throws FileNotFoundException,IOException{
+      BufferedReader br = new BufferedReader(new FileReader(new File(path)));
+      String line; 
+      Scanner scan = null; 
+      int count=0;
+      while((line = br.readLine()) !=null){
+         count++;
+//         print(line); //
+      }      
+//         JOptionPane.showMessageDialog(null, count); //
+         
+      br = new BufferedReader(new FileReader(new File(path)));
+      Candidate c; 
+      String name;
+      int code; 
+      Candidate[] candids = new Candidate[count];
+      int i=0;
+      while((line = br.readLine()) !=null){
+         scan =new Scanner(line);
+         scan.useDelimiter(",");
+         name = scan.next(); 
+         code = Integer.parseInt(scan.next().trim());
+         c= new Candidate(name , code);
+         candids[i++]=c;
+      }
+   
+      return candids;
+   	
+   }
+	
+   public static Voter[] getVoters(String path) throws FileNotFoundException,
+   IOException{
+      BufferedReader br = new BufferedReader(new FileReader(new File(path)));
+      String line; 
+      Scanner scan = null; 
+      int count=0;
+      while((line = br.readLine()) !=null){
+         count++;
+//         print(line); //         
+      }
+//      	JOptionPane.showMessageDialog(null, count); //
+         
+      br = new BufferedReader(new FileReader(new File(path)));
+      Voter v; 
+      char gender;
+      int code; 
+      Voter[] voters = new Voter[count];
+      int i=0;
+      while((line = br.readLine()) !=null){
+         scan =new Scanner(line);
+         scan.useDelimiter(",");
+         gender = scan.next().trim().charAt(0); 
+         code = Integer.parseInt(scan.next().trim());
+         v= new Voter(gender);
+         v.setVote(code);
+         voters[i++]=v;
+      }
+   
+      return voters;
+   	
+   }
+	
+   public static Candidate getWinner(Candidate[] candids, Voter[] voters){
+   	//TODO
+      
+      int count1 = 0;
+      int count2 = 0;
+      int count3 = 0;
+      int count4 = 0;
+      int count5 = 0;
+      
+      
+      //get total voted count for each candidate
+      for(int i = 0; i < voters.length; i++) {
+         if(voters[i].getVote() == 1) {
+            count1++;
+         }
+         else if(voters[i].getVote() == 2) {
+            count2++;
+         }
+         else if(voters[i].getVote() == 3) {
+            count3++;
+         }
+         else if(voters[i].getVote() == 4) {
+            count4++;
+         }
+         else if(voters[i].getVote() == 5) {
+            count5++;
+         }                           
+      }
+      
+      
+      
+      //create an array to hold each candidate
+      //each object in array will be created through bucket class
+      //each bucket contain array of voter object for corresponding candidate
+      
+      
+      Bucket[] candidateBucketArray = new Bucket[5]; 
+      
+      candidateBucketArray[0] = new Bucket(count1,1);
+      candidateBucketArray[1] = new Bucket(count2,2);
+      candidateBucketArray[2] = new Bucket(count3,3);
+      candidateBucketArray[3] = new Bucket(count4,4);
+      candidateBucketArray[4] = new Bucket(count5,5);
+      
+      
+      //add voter for each bucket
+      
+      for(int i = 0; i < voters.length; i++) {
+         if(voters[i].getVote() == 1) {
+            candidateBucketArray[0].add(voters[i]);               
+         }
+         else if(voters[i].getVote() == 2) {
+            candidateBucketArray[1].add(voters[i]);
+         }
+         else if(voters[i].getVote() == 3) {
+            candidateBucketArray[2].add(voters[i]);
+         }
+         else if(voters[i].getVote() == 4) {
+            candidateBucketArray[3].add(voters[i]);
+         }
+         else if(voters[i].getVote() == 5) {
+            candidateBucketArray[4].add(voters[i]);
+         }                  
+      }
+      
+    /*  
+      for(int i = 0 ; i < candidateBucketArray.length; i++) {
+         JOptionPane.showMessageDialog(null,candidateBucketArray[i].getSize());
+      }
+    */
+      
+      //using selection sort to sort bucket of candidate
+      //last bucket in the array is the winner
+		int min=0, k=0; 
+		for(int i=0; i<candidateBucketArray.length-1; i++){
+			min = candidateBucketArray[i].getSize();
+			
+         for(int j=i+1; j<candidateBucketArray.length; j++){
+				if(min > candidateBucketArray[j].getSize()) {
+					min = candidateBucketArray[j].getSize(); 
+					k=j;
+				}
+			}
+			if(candidateBucketArray[i].getSize() > min){ //swap
+				Bucket temp = candidateBucketArray[i];
+				candidateBucketArray[i] = candidateBucketArray[k]; 
+				candidateBucketArray[k] = temp; 
+			}
+		}      
+/*
+      for(int i = 0 ; i < candidateBucketArray.length; i++) {
+         JOptionPane.showMessageDialog(null,candidateBucketArray[i].getSize());
+      }
+*/      
+      
+      int candidate_code = candidateBucketArray[4].getKey() - 1; //minus one for not out of bound
+      
+      return candids[candidate_code]; //return winner object
+   }
+
+
+
+
+
+
+
+
+//-----------------   
+   public static void print( String message )
+   {
+      JOptionPane.showMessageDialog(null, message);
+   }
+   
+   
+   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
